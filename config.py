@@ -1,0 +1,7 @@
+HASHTAG = "#WALLNEX"
+REFRESH_TIME = 30
+MAX_TWEETS = 10
+OAUTH_TOKEN = "*******"
+OAUTH_SECRET = "*******"
+CONSUMER_KEY = "*******"
+CONSUMER_SECRET = "******"
