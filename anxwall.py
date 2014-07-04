@@ -9,6 +9,8 @@ import time
 import sys
 import config
 import nmap
+import urllib2
+import twitter
 
 ####Functions
 #Clear console screen
@@ -29,22 +31,41 @@ def clean(nbrOfCon):
     cls()
     header(nbrOfCon)
 
-
-def loadTweets(twit,nm):
+def getNumOfCon():
     nm.scan(hosts='192.168.1.0/24', arguments='-n -sP -T4')
     hosts_list = [(x) for x in nm.all_hosts()]
-    nbrOfCon = len(hosts_list)
-    tweets = twit.search.tweets(q=config.HASHTAG)
-    # Max number of tweet to diplay, we cut the array in loop
-    nbrofTweet = min(config.MAX_TWEETS, len(tweets['statuses']))
-    clean(nbrOfCon)
-    counter = nbrofTweet
-    for tweet in tweets['statuses'][:nbrofTweet]:
-        loadTweet(tweet)
-        counter -= 1
-        if counter != 0:
-            print
-        sys.stdout.flush()
+    return len(hosts_list)
+
+def loadTweets(twit,nm):
+    clean(getNumOfCon())
+
+    tweets = None
+    error = None
+
+    try:
+        tweets = twit.search.tweets(q=config.HASHTAG)
+    except urllib2.URLError:
+        error = "Oups ! Je n'arrive plus à me connecter au réseau"
+        pass
+    except twitter.api.TwitterHTTPError:
+        error = "Oups ! Je n'arrive plus à me connecter à Twitter"
+        pass
+    except:
+        error = "Oups ! Je n'arrive plus à récupérer les tweets"
+        pass
+
+    if error is not None:
+       print "\r\n"+colored(error, "red")
+
+    if tweets is not None:
+        nbrofTweet = min(config.MAX_TWEETS, len(tweets['statuses']))
+        counter = nbrofTweet
+        for tweet in tweets['statuses'][:nbrofTweet]:
+            loadTweet(tweet)
+            counter -= 1
+            if counter != 0:
+                print
+            sys.stdout.flush()
 
 def loadTweet(tweet):
     print(" ")
