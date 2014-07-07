@@ -9,8 +9,9 @@ import time
 import sys
 import config
 import nmap
-import urllib2
 import twitter
+from urllib2 import URLError
+import json
 
 ####Functions
 #Clear console screen
@@ -44,15 +45,23 @@ def load_tweets(twit,nm):
 
     try:
         tweets = twit.search.tweets(q=config.HASHTAG)
-    except urllib2.URLError:
+
+    # URLError
+    except URLError:
         error = "Oups ! Je n'arrive plus à me connecter au réseau"
-        pass
-    except twitter.api.TwitterHTTPError:
+
+    # Exception thrown by the Twitter object when there is an HTTP error interacting with twitter.com.
+    # {"errors":[{"message":"Bad Authentication data","code":215}]}
+    except twitter.api.TwitterHTTPError as e:
+        error = "Oups ! Je n'arrive plus à me connecter à Twitter (" + get_twitter_error_message(e.response_data) + ")"
+
+    # Base Exception thrown by the Twitter object when there is a general error interacting with the API.
+    except twitter.api.TwitterError:
         error = "Oups ! Je n'arrive plus à me connecter à Twitter"
-        pass
+
+    # Other error
     except:
         error = "Oups ! Je n'arrive plus à récupérer les tweets"
-        pass
 
     if error is not None:
        print "\r\n" + colored(error, "red")
@@ -66,6 +75,14 @@ def load_tweets(twit,nm):
             if counter != 0:
                 print
             sys.stdout.flush()
+
+def get_twitter_error_message(str):
+    try:
+        data = json.loads(str.decode("utf8"))
+        message = data["errors"][0]["message"];
+    except:
+        message = "Unknown error"
+    return message.encode("utf8")
 
 def load_tweet(tweet):
     print(" ")
