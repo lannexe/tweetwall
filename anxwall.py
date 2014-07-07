@@ -17,27 +17,27 @@ import twitter
 def cls():
     os.system(['clear','cls'][os.name == 'nt'])
 
-def header(nbrOfCon):
+def header(num_of_con):
     cprint(".____/\       ", "magenta")
     cprint("|    )/  _____    ____   ____   ____ ___  ___ ____  ", "magenta")
     cprint("|    |   \__  \  /    \ /    \_/ __ \\  \/  // __ \ ", "magenta")
     cprint("|    |___ / __ \|   |  \   |  \  ___/ >    <\  ___/ ", "magenta")
     cprint("|_______ (____  /___|  /___|  /\___  >__/\_ \\___  >", "magenta")
     cprint("        \/    \/     \/     \/     \/      \/    \/ ", "magenta")
-    print("Bienvenue sur le mur de l'annexe - "+ str(nbrOfCon) +" machines connectées au WIFI")
+    print("Bienvenue sur le mur de l'annexe - "+ str(num_of_con) +" machines connectées au WIFI")
     print("Hashtag " + colored(config.HASHTAG, "cyan") + " pour apparaitre sur le mur")
 
-def clean(nbrOfCon):
+def clean(num_of_con):
     cls()
-    header(nbrOfCon)
+    header(num_of_con)
 
-def getNumOfCon():
+def get_num_of_con():
     nm.scan(hosts='192.168.1.0/24', arguments='-n -sP -T4')
     hosts_list = [(x) for x in nm.all_hosts()]
     return len(hosts_list)
 
-def loadTweets(twit,nm):
-    clean(getNumOfCon())
+def load_tweets(twit,nm):
+    clean(get_num_of_con())
 
     tweets = None
     error = None
@@ -55,19 +55,19 @@ def loadTweets(twit,nm):
         pass
 
     if error is not None:
-       print "\r\n"+colored(error, "red")
+       print "\r\n" + colored(error, "red")
 
     if tweets is not None:
-        nbrofTweet = min(config.MAX_TWEETS, len(tweets['statuses']))
-        counter = nbrofTweet
-        for tweet in tweets['statuses'][:nbrofTweet]:
-            loadTweet(tweet)
+        num_of_tweet = min(config.MAX_TWEETS, len(tweets['statuses']))
+        counter = num_of_tweet
+        for tweet in tweets['statuses'][:num_of_tweet]:
+            load_tweet(tweet)
             counter -= 1
             if counter != 0:
                 print
             sys.stdout.flush()
 
-def loadTweet(tweet):
+def load_tweet(tweet):
     print(" ")
     date_utc = parser.parse(tweet['created_at']).replace(tzinfo=pytz.utc)
     local_tz = pytz.timezone("Europe/Paris")
@@ -89,5 +89,5 @@ nm = nmap.PortScanner() # creates an'instance of nmap.PortScanner
 
 #TODO Do this with a scheduler
 while True:
-    loadTweets(twit,nm)
+    load_tweets(twit,nm)
     time.sleep(config.REFRESH_TIME)
